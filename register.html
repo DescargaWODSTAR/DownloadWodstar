@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Registro | WodStar</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <h2>Registrar Gimnasio</h2>
+  <input type="email" id="email" placeholder="Correo del gimnasio" />
+  <input type="password" id="password" placeholder="Contraseña" />
+  <input type="text" id="gymName" placeholder="Nombre del gimnasio" />
+  <button onclick="register()">Registrar</button>
+
+  <script type="module">
+    import { auth, db } from './firebase.js';
+    import { createUserWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.12.1/firebase-auth.js';
+    import { doc, setDoc } from 'https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js';
+
+    window.register = async () => {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const gymName = document.getElementById('gymName').value;
+
+      try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+
+        // Crear documento en Firestore para el gimnasio
+        await setDoc(doc(db, 'gyms', user.uid), {
+          name: gymName,
+          schedule: ''
+        });
+
+        alert('Registro exitoso. Ahora puedes iniciar sesión.');
+        window.location.href = 'login.html';
+      } catch (error) {
+        alert('Error en el registro: ' + error.message);
+      }
+    };
+  </script>
+</body>
+</html>

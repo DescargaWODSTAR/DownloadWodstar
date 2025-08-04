@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Panel del Gimnasio</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <h2>Panel de Gestión de tu Gimnasio</h2>
+
+  <div id="info">
+    <label>Nombre del Gimnasio</label>
+    <input type="text" id="gymName" />
+
+    <label>Horario</label>
+    <input type="text" id="gymSchedule" />
+
+    <button id="saveBtn">Guardar Cambios</button>
+    <button id="logoutBtn">Cerrar sesión</button>
+  </div>
+
+  <script type="module">
+    import { auth, db } from './firebase.js';
+    import { onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.1/firebase-auth.js';
+    import { doc, getDoc, setDoc } from 'https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js';
+
+    const gymNameInput = document.getElementById('gymName');
+    const gymScheduleInput = document.getElementById('gymSchedule');
+    const saveBtn = document.getElementById('saveBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+
+    let userUid = null;
+
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        userUid = user.uid;
+        // Obtener datos del gimnasio
+        const gymRef = doc(db, 'gyms', userUid);
+        const gymSnap = await getDoc(gymRef);
+        if (gymSnap.exists()) {
+          const data = gymSnap.data();
+          gymNameInput.value = data.name || '';
+          gymScheduleInput.value = data.schedule || '';
+        } else {
+          // Si no hay datos aún, deja inputs vacíos
+          gymNameInput.value = '';
+          gymScheduleInput.value = '';
+        }
+      } else {
+        // Si no está logueado, redirige a login
+        window.location.href = 'login.html';
+      }
+    });
+
+    saveBtn.addEventListener('click', async () => {
+      if (!userUid) return alert('No autorizado');
+      const gymRef = doc(db, 'gyms', userUid);
+      try {
+        await setDoc(gymRef, {
+          name: gymNameInput.value,
+          schedule: gymScheduleInput.value
+        });
+        alert('Datos guardados');
+      } catch (error) {
+        alert('Error al guardar: ' + error.message);
+      }
+    });
+
+    logoutBtn.addEventListener('click', () => {
+      signOut(auth).then(() => {
+        window.location.href = 'login.html';
+      });
+    });
+  </script>
+</body>
+</html>
