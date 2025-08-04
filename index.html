@@ -73,6 +73,15 @@
       }
     });
   }
+  <h2>Iniciar sesión</h2>
+<form id="login-form">
+  <input type="email" id="login-email" placeholder="Correo electrónico" required />
+  <input type="password" id="login-password" placeholder="Contraseña" required />
+  <button type="submit">Entrar</button>
+</form>
+
+<div id="login-result"></div>
+
 </script>
 
 <body>
@@ -132,5 +141,40 @@
       <p>Clases reservadas hoy: <strong>8</strong></p>
     </section>
   </main>
+  <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "TU_API_KEY",
+    authDomain: "TU_DOMINIO.firebaseapp.com",
+    projectId: "TU_PROJECT_ID",
+    storageBucket: "TU_PROJECT_ID.appspot.com",
+    messagingSenderId: "TU_SENDER_ID",
+    appId: "TU_APP_ID"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  const loginForm = document.getElementById("login-form");
+  const result = document.getElementById("login-result");
+
+  loginForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const email = document.getElementById("login-email").value;
+    const password = document.getElementById("login-password").value;
+
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      result.innerText = "Bienvenido: " + userCredential.user.email;
+      // Aquí puedes redirigir a otra página si quieres
+      // window.location.href = "dashboard.html";
+    } catch (error) {
+      result.innerText = "Error: " + error.message;
+    }
+  });
+</script>
+
 </body>
 </html>
